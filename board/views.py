@@ -1,45 +1,35 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
-from rest_framework.status import HTTP_401_UNAUTHORIZED, HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from .models import User, Project, Task, Category, Comment
 from .serializers import UserSerializer, ProjectSerializer, TaskSerializer, CategorySerializer, CommentSerializer
 from .permissions import IsBoardMember, IsDeveloper
-from django.core.mail import send_mail
 
-from rest_framework import status
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+class UserViewSet(viewsets.ViewSet):
     serializer_class = UserSerializer
 
-    @action(detail=False, methods=['post'])
-    def signup(self, request):
-        serializer = self.get_serializer(data=request.data)
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data['email']
+        
+        email = serializer.validated_data.get('email')
         if User.objects.filter(email=email).exists():
-            return Response({'error': 'A user with this email already exists.'}, status=status.HTTP_400_BAD_REQUEST)
-        status_code = request.data.get('status', status.HTTP_201_CREATED)
-        self.perform_create(serializer, status_code)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status_code, headers=headers)
-
-    def perform_create(self, serializer, status_code):
-        user = serializer.save()
-        user.is_active = status_code == status.HTTP_201_CREATED
-        user.save()
-
+            return Response({'error': 'Email is already registered'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = serializer.save(is_active=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['post'])
     def login(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
-        user = authenticate(email=email, password=password)
+        
+        user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)
             return Response({'message': 'Logged in successfully'})
@@ -49,7 +39,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def me(self, request):
         if request.user.is_authenticated:
-            serializer = self.get_serializer(request.user)
+            serializer = self.serializer_class(request.user)
             return Response(serializer.data)
         else:
             return Response({'error': 'User is not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -57,12 +47,13 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['put'])
     def update_profile(self, request):
         if request.user.is_authenticated:
-            serializer = self.get_serializer(request.user, data=request.data, partial=True)
+            serializer = self.serializer_class(request.user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
         else:
             return Response({'error': 'User is not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
