@@ -3,12 +3,16 @@ from django.db import models
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    name = models.CharField(max_length=255)
-    phone = models.CharField(max_length=15)
+    name = models.CharField(max_length=255, default=False)
+    phone = models.CharField(max_length=15, default=False)
     role = models.CharField(max_length=20, choices=[('Board Manager', 'Board Manager'), ('Developer', 'Developer')])
 
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email', 'name', 'phone', 'role']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'name', 'phone', 'role']
+
+
+    def __str__(self):
+        return self.email
 
     # Specify unique related_name for groups
     groups = models.ManyToManyField(

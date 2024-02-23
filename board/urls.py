@@ -11,5 +11,4 @@ router.register(r'comments', CommentViewSet, basename='comment')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('api/v1/users/login/', UserViewSet.as_view({'post': 'login'}), name='user-login'),
 ]

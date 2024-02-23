@@ -1,14 +1,15 @@
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.decorators import action , permission_classes,api_view
 from rest_framework.response import Response
 from .models import User, Project, Task, Category, Comment
 from .serializers import UserSerializer, ProjectSerializer, TaskSerializer, CategorySerializer, CommentSerializer
 from .permissions import IsBoardMember, IsDeveloper
+from rest_framework.status import HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_204_NO_CONTENT
+
 
 class UserViewSet(viewsets.ViewSet):
     serializer_class = UserSerializer
@@ -101,10 +102,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
         pass
 
 
-
-
-
-
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
@@ -155,12 +152,9 @@ class TaskViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Status not provided'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-
-
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -208,75 +202,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 
-@api_view(['POST'])
-def logout_view(request):
-    if request.method == 'POST':
-        logout(request)
-        return JsonResponse({'message': 'Logged out successfully'})
 
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
-def user_view(request):
-    user = request.user
-    serializer = UserSerializer(user)
-    return Response(serializer.data)
 
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
-def project_view(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
-    serializer = ProjectSerializer(project)
-    return Response(serializer.data)
 
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
-def task_view(request, task_id):
-    task = get_object_or_404(Task, id=task_id)
-    serializer = TaskSerializer(task)
-    return Response(serializer.data)
 
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated, IsBoardMember])
-def board_projects_view(request):
-    projects = Project.objects.filter(board_member=request.user)
-    serializer = ProjectSerializer(projects, many=True)
-    return Response(serializer.data)
-
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated, IsDeveloper])
-def developer_tasks_view(request):
-    tasks = Task.objects.filter(developer=request.user)
-    serializer = TaskSerializer(tasks, many=True)
-    return Response(serializer.data)
-
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated, IsDeveloper])
-def developer_project_tasks_view(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
-    tasks = Task.objects.filter(project=project, developer=request.user)
-    serializer = TaskSerializer(tasks, many=True)
-    return Response(serializer.data)
-
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated, IsBoardMember])
-def board_member_project_tasks_view(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
-    tasks = Task.objects.filter(project=project)
-    serializer = TaskSerializer(tasks, many=True)
-    return Response(serializer.data)
-
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated, IsDeveloper])
-def developer_project_categories_view(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
-    categories = Category.objects.filter(project=project)
-    serializer = CategorySerializer(categories, many=True)
-    return Response(serializer.data)
-
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated, IsBoardMember])
-def board_member_project_categories_view(request, project_id):
-    project = get_object_or_404(Project, id=project_id) 
-    categories = Category.objects.filter(project=project) 
-    serializer = CategorySerializer(categories, many=True)
-    return Response(serializer.data)
