@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import User, Project, Task, Category, Comment
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -7,22 +9,56 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'email', 'name', 'phone', 'role', 'password')
         extra_kwargs = {'password': {'write_only': True}}
 
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user
+
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = ('id', 'title', 'description', 'developers', 'board_member')
+
 
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ('id', 'title', 'description', 'categories', 'developer', 'priority', 'project', 'status')
 
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ('id', 'name')
 
+
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'text', 'user', 'task', 'file')
+
+
+class TokenObtainPairSerializer(serializers.Serializer):
+    """
+    Serializer for obtaining a JSON Web Token and Refresh Token pair.
+    """
+    access = serializers.CharField(read_only=True)
+    refresh = serializers.CharField(read_only=True)
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
+
+class TokenRefreshSerializer(serializers.Serializer):
+    """
+    Serializer for refreshing an existing JSON Web Token.
+    """
+    refresh = serializers.CharField(read_only=True)
+    access = serializers.CharField(read_only=True)
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass

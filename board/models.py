@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=255, default=False)
@@ -9,7 +10,6 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'name', 'phone', 'role']
-
 
     def __str__(self):
         return self.email
@@ -31,11 +31,14 @@ class User(AbstractUser):
         help_text='Specific permissions for this user.',
         verbose_name='user permissions'
     )
+
+
 class Project(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     developers = models.ManyToManyField(User, related_name='projects')
     board_member = models.ForeignKey(User, on_delete=models.CASCADE, related_name='board_projects')
+
 
 class Task(models.Model):
     title = models.CharField(max_length=100)
@@ -46,8 +49,10 @@ class Task(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
     status = models.CharField(max_length=20, choices=[('Not Started', 'Not Started'), ('In Progress', 'In Progress'), ('Completed', 'Completed')])
 
+
 class Category(models.Model):
     name = models.CharField(max_length=50)
+
 
 class Comment(models.Model):
     text = models.TextField()
