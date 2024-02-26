@@ -165,10 +165,10 @@ class TaskViewSet(viewsets.ModelViewSet):
             return Response({'error': 'You do not have permission to create a task in this project'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def send_new_task_email(self, task):
-        subject = f'New task created: {task.title}'
-        message = f'A new task has been created in the project {task.project.title}.'
-        from_email = 'noufalmhd112@gmail.com'
-        recipient_list = [developer.email for developer in task.project.developers.all()]
+        subject = f'New task created: {task.name}'
+        message = f'A new task has been created: {task.name} - {task.description}'
+        from_email = 'noreply@example.com'
+        recipient_list = [task.project.board_member.email]
         send_mail(subject, message, from_email, recipient_list)
 
 
@@ -186,34 +186,28 @@ class TaskViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def update(self, request, project_id, pk=None):
-        project = get_object_or_404(Project, id=project_id)
-        task = get_object_or_404(Task, id=pk, project=project)
-        if task.developer == request.user:
+            project = get_object_or_404(Project, id=project_id)
+            task = get_object_or_404(Task, id=pk, project=project)
             serializer = self.get_serializer(task, data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
-        else:
-            return Response({'error': 'You do not have permission to update this task'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def destroy(self, request, project_id, pk=None):
         project = get_object_or_404(Project, id=project_id)
         task = get_object_or_404(Task, id=pk, project=project)
-        if task.developer == request.user:
-            task_name = task.name
-            task_description = task.description
-            developer_email = task.developer.email
-            task.delete()
-            self.send_task_deleted_email(task_name, task_description, developer_email)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response({'error': 'You do not have permission to delete this task'}, status=status.HTTP_401_UNAUTHORIZED)
+        task_name = task.name
+        task_description = task.description
+        success_message = self.send_task_deleted_email(task_name, task_description)
+        task.delete()
+        self.send_task_deleted_email(task_name, task_description)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def send_task_deleted_email(self, task_name, task_description, developer_email):
+    def send_task_deleted_email(self, task_name, task_description, developer_email=None):
         subject = 'Task Deleted'
         message = f'Task "{task_name}" with description "{task_description}" has been deleted.'
         from_email = 'noufalmhd112@gmail.com'
-        recipient_list = [developer_email]
+        recipient_list = [developer_email] if developer_email else []
         send_mail(subject, message, from_email, recipient_list)
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -229,7 +223,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def create(self, request, project_id, task_id):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer, task_id)
+        self.perform_create(serializer) 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -247,18 +241,18 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
    
     def update_comment(self, request, project_id, task_id, pk=None):
-            task = get_object_or_404(Task, id=task_id, project__id=project_id)
-            comment = get_object_or_404(Comment, id=pk, task=task, author=request.user)
+        task = get_object_or_404(Task, id=task_id, project__id=project_id)
+        comment = get_object_or_404(Comment, id=pk, task=task)
 
-            serializer = self.get_serializer(comment, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
+        serializer = self.get_serializer(comment, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     @action(methods=['post'], detail=True)
     def update_text(self, request, project_id, task_id, pk=None):
         return self.update_comment(request, project_id, task_id, pk)
-    
+
 
     def delete_comment(self, request, project_id, task_id, pk=None):
         task = get_object_or_404(Task, id=task_id, project__id=project_id)

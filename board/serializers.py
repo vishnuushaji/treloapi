@@ -25,19 +25,13 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    developer = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(),
-        allow_null=True,
-        required=False
-    )
-
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'categories', 'developer', 'priority', 'project', 'status']
+        fields = ('id', 'title', 'description', 'categories', 'priority', 'project', 'status')
 
     def destroy(self, instance):
         instance.delete()
-        return instance
+        return instance 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
