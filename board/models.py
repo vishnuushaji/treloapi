@@ -1,11 +1,12 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=255, default=False)
     phone = models.CharField(max_length=15, default=False)
+    username = models.CharField(max_length=15, default=False)
+    
     role = models.CharField(max_length=20, choices=[('Board Manager', 'Board Manager'), ('Developer', 'Developer')])
 
     USERNAME_FIELD = 'email'
@@ -31,6 +32,9 @@ class User(AbstractUser):
         help_text='Specific permissions for this user.',
         verbose_name='user permissions'
     )
+
+class SomeModel(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 class Project(models.Model):

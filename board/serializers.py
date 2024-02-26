@@ -6,17 +6,22 @@ from rest_framework_simplejwt.tokens import RefreshToken
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'name', 'phone', 'role', 'password')
+        fields = ('id',  'email', 'username','name', 'phone', 'role', 'password')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
-
+    
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.phone = validated_data.get('phone', instance.phone)
+        instance.save()
+        return instance
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ('id', 'title', 'description', 'developers', 'board_member')
+        fields = ('id', 'title', 'description')
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -24,6 +29,9 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = ('id', 'title', 'description', 'categories', 'developer', 'priority', 'project', 'status')
 
+    def destroy(self, instance):
+        instance.delete()
+        return instance 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
