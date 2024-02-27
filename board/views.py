@@ -22,25 +22,20 @@ class UserViewSet(viewsets.ModelViewSet):
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
-        
+
         email = serializer.validated_data.get('email')
         password = serializer.validated_data.get('password')
         name = serializer.validated_data.get('name')
         phone = serializer.validated_data.get('phone')
         role = serializer.validated_data.get('role')
-        
-        
+                
         user = User.objects.create_user(email=email, password=password, name=name, phone=phone, role=role, is_active=True)
-        
         refresh = RefreshToken.for_user(user)
-
         return Response({
             'user': serializer.data,
             'access_token': str(refresh.access_token),
             'refresh_token': str(refresh)
         }, status=status.HTTP_201_CREATED)
-
 
 
     @action(detail=False, methods=['post'])
@@ -53,7 +48,6 @@ class UserViewSet(viewsets.ModelViewSet):
             login(request, user)
 
             refresh = RefreshToken.for_user(user)
-
             return Response({
                 'access_token': str(refresh.access_token),
                 'refresh_token': str(refresh)
@@ -145,8 +139,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
         else:
             raise PermissionDenied("You do not have permission to delete this project")
 
-    def send_project_deletion_email(self, project):
-        pass
+    # def send_project_deletion_email(self, project):
+    #     pass
 
 
 def send_new_task_email(task):
