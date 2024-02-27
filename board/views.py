@@ -2,17 +2,17 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User, Project, Task, Category, Comment
 from .serializers import UserSerializer, ProjectSerializer, TaskSerializer, CategorySerializer, CommentSerializer
 from .permissions import IsBoardMember, IsDeveloper
-from rest_framework.status import HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_204_NO_CONTENT
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
-
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import serializers
+from rest_framework import status
+from rest_framework.response import Response
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -23,11 +23,15 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        email = serializer.validated_data.get('email')
-        if User.objects.filter(email=email).exists():
-            return Response({'error': 'Email is already registered'}, status=status.HTTP_400_BAD_REQUEST)
         
-        user = serializer.save(is_active=True)
+        email = serializer.validated_data.get('email')
+        password = serializer.validated_data.get('password')
+        name = serializer.validated_data.get('name')
+        phone = serializer.validated_data.get('phone')
+        role = serializer.validated_data.get('role')
+        
+        
+        user = User.objects.create_user(email=email, password=password, name=name, phone=phone, role=role, is_active=True)
         
         refresh = RefreshToken.for_user(user)
 
@@ -36,6 +40,8 @@ class UserViewSet(viewsets.ModelViewSet):
             'access_token': str(refresh.access_token),
             'refresh_token': str(refresh)
         }, status=status.HTTP_201_CREATED)
+
+
 
     @action(detail=False, methods=['post'])
     def login(self, request):
@@ -65,12 +71,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['put'])
     def update_profile(self, request):
-        serializer = self.get_serializer(request.user, data=request.data, partial=True)
+        user = request.user
+        serializer = self.get_serializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-
-
 
 
 
@@ -88,7 +93,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def send_project_creation_email(self, project):
         subject = f'New project created: {project.title}'
-        message = f'A new project has been created by {project.board_member.username}.'
+        message = f'A new project has been created by {project.board_member.email}.'
         from_email = 'noufalmhd112@gmail.com'
         recipient_list = [member.email for member in project.developers.all()]
         send_mail(subject, message, from_email, recipient_list)
@@ -127,7 +132,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def send_project_update_email(self, project):
         subject = f'Project updated: {project.title}'
-        message = f'The project {project.title} has been updated by {project.board_member.username}.'
+        message = f'The project {project.title} has been updated by {project.board_member.email}.'
         from_email = 'noufalmhd112@gmail.com'
         recipient_list = [member.email for member in project.developers.all()]
         send_mail(subject, message, from_email, recipient_list)
@@ -144,6 +149,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
         pass
 
 
+def send_new_task_email(task):
+        subject = f'New task created: {task.title}'
+        message = f'A new task has been created by {task.project.board_member.email} in the project {task.project.title}.'
+        from_email = 'noufalmhd112@gmail.com'
+        recipient_list = [member.email for member in task.project.developers.all()]
+        send_mail(subject, message, from_email, recipient_list)
 
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
@@ -153,26 +164,23 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def create(self, request, project_id):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)     
+        serializer.is_valid(raise_exception=True)
+
         project = get_object_or_404(Project, id=project_id)
-        
+
         if project.board_member == request.user:
-            task = serializer.save(project=project)
-            self.send_new_task_email(task)
-            
+            developer_id = request.data.get('developer')
+            if developer_id is None:
+                raise serializers.ValidationError({'developer': 'Developer is required'})
+            developer = User.objects.get(id=developer_id)
+            task = serializer.save(project=project, developer=developer)
+            send_new_task_email(task)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({'error': 'You do not have permission to create a task in this project'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    def send_new_task_email(self, task):
-        subject = f'New task created: {task.name}'
-        message = f'A new task has been created: {task.name} - {task.description}'
-        from_email = 'noreply@example.com'
-        recipient_list = [task.project.board_member.email]
-        send_mail(subject, message, from_email, recipient_list)
 
-
-    
     def get(self, request, project_id):
         project = get_object_or_404(Project, id=project_id)
         tasks = self.queryset.filter(project=project)
@@ -196,11 +204,10 @@ class TaskViewSet(viewsets.ModelViewSet):
     def destroy(self, request, project_id, pk=None):
         project = get_object_or_404(Project, id=project_id)
         task = get_object_or_404(Task, id=pk, project=project)
-        task_name = task.name
+        task_name = task.title
         task_description = task.description
         success_message = self.send_task_deleted_email(task_name, task_description)
         task.delete()
-        self.send_task_deleted_email(task_name, task_description)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def send_task_deleted_email(self, task_name, task_description, developer_email=None):
@@ -209,6 +216,8 @@ class TaskViewSet(viewsets.ModelViewSet):
         from_email = 'noufalmhd112@gmail.com'
         recipient_list = [developer_email] if developer_email else []
         send_mail(subject, message, from_email, recipient_list)
+        return f'Task "{task_name}" has been deleted.'
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -263,6 +272,3 @@ class CommentViewSet(viewsets.ModelViewSet):
 
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-   
