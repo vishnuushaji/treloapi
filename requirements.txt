@@ -2,12 +2,6 @@ asgiref==3.7.2
 Django==4.2.9
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.0
-django-googledrive-storage==1.6.0
-google-api-core==2.10.2
-google-api-python-client==2.119.0
-google-auth==1.35.0
-google-auth-httplib2==0.2.0
-googleapis-common-protos==1.62.0
 pytz==2024.1
 sqlparse==0.4.4
 tzdata==2024.1

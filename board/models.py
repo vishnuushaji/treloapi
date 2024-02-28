@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from gdstorage.storage import GoogleDriveStorage
-gd_storage = GoogleDriveStorage()
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -49,4 +48,4 @@ class Comment(models.Model):
     text = models.TextField()
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='comments')
-    file = models.FileField(upload_to='comments/', null=True, blank=True, storage=gd_storage)
+    file = models.FileField(upload_to='comments/', null=True, blank=True)
