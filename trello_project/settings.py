@@ -1,8 +1,6 @@
 from pathlib import Path
 import os
 import environ
-from decouple import config
-import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,7 +35,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
-    'gdstorage'
     'board',
 ]
 
@@ -182,9 +179,3 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
-
-
-
-
-GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE = 'service_key.json'  
-GOOGLE_DRIVE_STORAGE_MEDIA_ROOT = '/testfolder'
