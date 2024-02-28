@@ -36,7 +36,26 @@ class UserViewSet(viewsets.ModelViewSet):
             'access_token': str(refresh.access_token),
             'refresh_token': str(refresh)
         }, status=status.HTTP_201_CREATED)
+    
+    def list(self, request):
+        user = request.user
+        serializer = self.serializer_class(user)
+        return Response(serializer.data)
 
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        data = request.data.copy()
+        allowed_fields = {'phone', 'name'}
+        data = {key: value for key, value in data.items() if key in allowed_fields}
+
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     @action(detail=False, methods=['post'])
     def login(self, request):
@@ -54,23 +73,6 @@ class UserViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid email or password'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    @action(detail=False, methods=['get'])
-    def me(self, request):
-        if request.user.is_authenticated:
-            serializer = self.serializer_class(request.user)
-            return Response(serializer.data)
-        else:
-            return Response({'error': 'User is not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    @action(detail=False, methods=['put'])
-    def update_profile(self, request):
-        user = request.user
-        serializer = self.get_serializer(user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
