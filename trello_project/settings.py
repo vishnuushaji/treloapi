@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'gdstorage'
     'board',
 ]
 
@@ -138,6 +139,9 @@ AUTH_USER_MODEL = 'board.User'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+
+GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE = 'service_key.json'  
+GOOGLE_DRIVE_STORAGE_MEDIA_ROOT = '/testfolder'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

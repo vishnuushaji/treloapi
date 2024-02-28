@@ -1,0 +1,13 @@
+{
+    "type": "service_account",
+    "project_id": "ministore-413812",
+    "private_key_id": "1fc25a102e427ffc36e0adeb85ab8eeee5f229ce",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDA5lK0fjL2n3gr\niFUc61fh9EvC2eaAWnD1XL+Ov4mX1IWpdEszs1Nh1Y4sRptOQctO6jkxbv9GudJi\nk9emDZo858gkC6gLw20xq4yrUJSoSpQKIx4Atp8a4LJ9EuGNFGSoavFTMhJtPSAo\neXe2GiomQSQ1kIB+7dtZS4m2iWkxiv2NC58RQs3bxJThloMdrB0bayYP2Zunj6Fu\nGjWKKt38xVm4Ded4/3qaiMzdb/qZwiQJ0ihYA2JnscHAzwG+kl9caq1/yHAsFl0T\nRtrk1FJubeZNklAh1ceg0hqLkcpwJjTNZduOc3XidyFE+NQT9XSgQdn6eNioQeXl\nLruF+XbBAgMBAAECggEAAJsoqDMGT3floti2kGpH4tNHl/44ccT2+mUMdV3HiE/Y\nDKsrdPyLrEYawIEHSg9oXLWH26PSOa4Unw/WW19LEa/BFVCTule77y5EuUwTRNUZ\nJ8//meJ5AlaxkOA0j7gq7yGI476c8rVrYAfZAbGNhNnAYUpfMPw9K8e85XMt6VnZ\nn8xEy2BRGRjN2hu9dFL4Pvt5z3QSRyXqllExbIApJGiSflxEOt/WIEesHScfCyOS\n8j1TcSbEkKJmU9RLzs6bdQhiPrF500quK0dK6ciH8YQWFNqBNutRFpbb6BDkbLsl\n5JWAyDk19MD22rIvz/rsam1ZnwX+AQHWlk0jbW1oMQKBgQD66iElyHWXxSwX9wuF\nx0UG+V8T4HTDvqLUqHs9IwjZKSayTdI6BAPDDuhNCPg38uXKlpcY20MM4fzfSjRk\nOPoicU5vkR8s7IhVPtel8Si2SIqdTftd8Oqly+b2FTAgb33mhyyfp8ScQZgTnlg3\nJApBOwhms+jX0hG1Ij1qiOfnSQKBgQDEzy7xfUsEDWSlowv/2QkIT1srcsdJzl5d\noLN+ox3nhmCC0tu7yTuI/LMtD/QmM01gaoAk9gPsl3dkgnfXg6DRuUS3Qf5L7c5P\n/OMApGF1wcWIr0twePyHKt63JvY9ldtvPfYPLJ+AQ6AIYAYHVfvoDi3j8cdlb0z6\nZ34jN+m7uQKBgAHUf1VlNuZae83Y8W6SW4CHhRgCBRgAZfOjHvL9NG1RDYUzaBsg\nOF7N1wfoztapoN9vZb66qqyHYW7HfcZVXA2wQeAycMXFG+FzSeNd9OwPb2NiVDkF\nLtDywcZ9tRInfgWWas7nTFnPaKqL9xy/2ItNQOxu133rfFGT5FrIkNhxAoGBAK+j\nUnqTXXodVb/4dYH7t/LhlzR8N1wnvtGB1A5lFhAEPWcjNJQu72G+W00Q2suopxov\nkXLq1u+y8QsS4E7GGqRv2eJOE9rBPIjn39I34P5NUrM79XBHmN4sJRyAueqWLYHm\nYwyBv0qhj1VKFLdBRhF/bfbqVA+zN5iU+d4GTSKJAoGBAKeAcEpjhKB7WkqFAjTu\njv7n/CXXAAGOFnBIpDEpq6COEWrCnyqM9igwr2R5Y2A1RgM4qIys3obqEHw3SYgY\nYLoQgXjjtb407tz1f08YAZhNYKdXsTYEY/4t3JCszWmuNhhC3yZX6CAHyBx2nYfG\n/krM3UPO9+pe/RUosyzywt3c\n-----END PRIVATE KEY-----\n",
+    "client_email": "noufal112@ministore-413812.iam.gserviceaccount.com",
+    "client_id": "101173955531517550832",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/noufal112%40ministore-413812.iam.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+  }
